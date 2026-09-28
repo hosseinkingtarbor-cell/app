@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f766e" />
+  <title>دفترچه خودرو | ثبت سوخت، روغن و تعمیرات</title>
+  <script src="https://cdn.jsdelivr.net/npm/jalaali-js@1.2.7/dist/jalaali.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #0d5c56;
+      --primary-light: #14b8a6;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --bg: #f0fdfa;
+      --card: #ffffff;
+      --text: #134e4a;
+      --muted: #5eead4;
+      --border: #99f6e4;
+      --shadow: 0 4px 20px rgba(15, 118, 110, 0.12);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Tahoma', 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(160deg, #f0fdfa 0%, #ccfbf1 50%, #e0f2fe 100%);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 12px 16px 100px; }
+
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #0d9488 100%);
+      color: white;
+      padding: 18px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header h1 { font-size: 1.35rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    header p { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+    .header-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 16px; border: none; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-family: inherit;
+    }
+    .btn-primary { background: white; color: var(--primary); }
+    .btn-primary:hover { background: #f0fdfa; transform: translateY(-1px); }
+    .btn-accent { background: var(--accent); color: white; }
+    .btn-accent:hover { background: #d97706; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-outline {
+      background: transparent; color: white;
+      border: 2px solid rgba(255,255,255,0.5);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.15); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+    .btn-icon { padding: 8px; border-radius: 10px; }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 6px; background: var(--card);
+      padding: 6px; border-radius: 16px; box-shadow: var(--shadow);
+      margin-bottom: 20px; overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1; min-width: 100px; padding: 12px 8px;
+      border: none; background: transparent; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600; color: var(--text);
+      cursor: pointer; transition: all 0.2s; font-family: inherit;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: var(--primary); color: white;
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
+    }
+    .tab-btn:hover:not(.active) { background: #f0fdfa; }
+
+    /* Cards */
+    .card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 1.1rem; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--primary-dark);
+    }
+
+    /* Forms */
+    .form-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 11px 14px; border: 2px solid var(--border);
+      border-radius: 12px; font-size: 0.95rem; font-family: inherit;
+      background: #f8fffe; transition: border 0.2s; color: var(--text);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none; border-color: var(--primary); background: white;
+    }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .calc-preview {
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border: 2px solid var(--primary-light); border-radius: 12px;
+      padding: 12px 16px; margin-top: 12px; font-weight: 600;
+      color: var(--primary-dark); display: none;
+    }
+    .calc-preview.show { display: block; }
+
+    /* Stats */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; margin-bottom: 16px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+      border-radius: 14px; padding: 16px; text-align: center;
+      border: 1px solid var(--border);
+    }
+    .stat-card .value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .stat-card .label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+
+    /* Charts */
+    .chart-container {
+      position: relative; height: 220px; margin: 16px 0;
+    }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th, td { padding: 12px 10px; text-align: right; border-bottom: 1px solid #e2e8f0; }
+    th {
+      background: #f0fdfa; font-weight: 700; color: var(--primary-dark);
+      position: sticky; top: 0; white-space: nowrap;
+    }
+    tr:hover { background: #f8fffe; }
+    .actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-ok { background: #d1fae5; color: #065f46; }
+    .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-danger { background: #fee2e2; color: #991b1b; }
+
+    /* Search & Filter */
+    .toolbar {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1; min-width: 180px; position: relative;
+    }
+    .search-box input {
+      width: 100%; padding: 10px 14px 10px 40px;
+      border: 2px solid var(--border); border-radius: 12px;
+      font-size: 0.9rem; font-family: inherit; background: white;
+    }
+    .search-box::before {
+      content: "🔍"; position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%); font-size: 0.95rem;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center; padding: 40px 20px; color: #94a3b8;
+    }
+    .empty .icon { font-size: 3rem; margin-bottom: 10px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white; border-radius: 20px; padding: 24px;
+      width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal h3 { margin-bottom: 16px; color: var(--primary-dark); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--primary-dark); color: white; padding: 12px 24px;
+      border-radius: 12px; font-size: 0.9rem; z-index: 2000;
+      opacity: 0; transition: opacity 0.3s; pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2); white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* Next service alert */
+    .alert {
+      padding: 14px 16px; border-radius: 12px; margin-bottom: 16px;
+      font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 10px;
+    }
+    .alert-ok { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .alert-warn { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.15rem; }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      th, td { padding: 10px 6px; font-size: 0.8rem; }
+      .tab-btn { font-size: 0.8rem; padding: 10px 6px; }
+    }
+    @media (max-width: 400px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    /* FAB */
+    .fab-container {
+      position: fixed; bottom: 24px; left: 24px; z-index: 90;
+      display: flex; flex-direction: column-reverse; gap: 10px; align-items: flex-start;
+    }
+    .fab {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--primary); color: white; border: none;
+      font-size: 1.5rem; cursor: pointer; box-shadow: 0 6px 20px rgba(15,118,110,0.4);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .fab:hover { transform: scale(1.08); background: var(--primary-dark); }
+    .fab-menu { display: none; flex-direction: column; gap: 8px; }
+    .fab-menu.show { display: flex; }
+    .fab-item {
+      display: flex; align-items: center; gap: 8px;
+      background: white; color: var(--text); padding: 10px 16px;
+      border-radius: 28px; border: none; font-family: inherit;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12); white-space: nowrap;
+    }
+    .fab-item:hover { background: #f0fdfa; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container" style="padding-bottom:0;padding-top:0">
+      <h1>🚗 دفترچه خودرو</h1>
+      <p>ثبت سوخت • تعویض روغن • تعمیرات — داده‌ها فقط روی دستگاه شما ذخیره می‌شوند</p>
+      <div class="header-actions">
+        <button class="btn btn-outline btn-sm" onclick="exportAllCSV()">📥 خروجی CSV همه</button>
+        <button class="btn btn-outline btn-sm" onclick="confirmClearAll()">🗑 پاک‌کردن همه</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="fuel" onclick="switchTab('fuel')">⛽ ثبت سوخت</button>
+      <button class="tab-btn" data-tab="oil" onclick="switchTab('oil')">🛢 تعویض روغن</button>
+      <button class="tab-btn" data-tab="repair" onclick="switchTab('repair')">🔧 تعمیرات</button>
+    </div>
+
+    <!-- ========== TAB: FUEL ========== -->
+    <div id="tab-fuel" class="tab-content">
+      <div class="card">
+        <div class="card-title">➕ ثبت سوخت جدید</div>
+        <form id="fuelForm" onsubmit="saveFuel(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>تاریخ (شمسی)</label>
+              <input type="text" id="fuelDate" placeholder="مثال: 1403/06/15" required />
+            </div>
+            <div class="form-group">
+              <label>کیلومتر فعلی</label>
+              <input type="number" id="fuelOdo" placeholder="مثلاً 85000" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>لیتر سوخت</label>
+              <input type="number" id="fuelLiters" placeholder="مثلاً 40" step="0.1" min="0.1" required oninput="calcFuelCost()" />
+            </div>
+            <div class="form-group">
+              <label>قیمت هر لیتر (تومان)</label>
+              <input type="number" id="fuelPrice" placeholder="مثلاً 3000" min="0" required oninput="calcFuelCost()" />
+            </div>
+            <div class="form-group">
+              <label>نوع سوخت</label>
+              <select id="fuelType">
+                <option value="بنزین معمولی">بنزین معمولی</option>
+                <option value="بنزین سوپر">بنزین سوپر</option>
+                <option value="گازوئیل">گازوئیل</option>
+                <option value="CNG">CNG</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>ایستگاه / توضیحات</label>
+              <input type="text" id="fuelNote" placeholder="اختیاری" />
+            </div>
+          </div>
+          <div class="calc-preview" id="fuelCalcPreview">هزینه کل: <span id="fuelCostVal">0</span> تومان</div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 ذخیره سوخت</button>
+            <button type="button" class="btn btn-outline" style="color:var(--text);border-color:var(--border)" onclick="resetFuelForm()">پاک کردن فرم</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 آمار سوخت</div>
+        <div class="stats-grid" id="fuelStats"></div>
+        <div class="chart-container"><canvas id="fuelChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 سوابق سوخت</div>
+        <div class="toolbar">
+          <div class="search-box">
+            <input type="text" id="fuelSearch" placeholder="جستجو در سوابق..." oninput="renderFuelTable()" />
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="exportCSV('fuel')">📥 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>تاریخ</th><th>کیلومتر</th><th>لیتر</th><th>قیمت/ل</th>
+                <th>هزینه</th><th>نوع</th><th>توضیح</th><th>عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="fuelTableBody"></tbody>
+          </table>
+        </div>
+        <div id="fuelEmpty" class="empty hidden"><div class="icon">⛽</div><p>هنوز سوختی ثبت نشده</p></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: OIL ========== -->
+    <div id="tab-oil" class="tab-content hidden">
+      <div id="oilAlert"></div>
+      <div class="card">
+        <div class="card-title">➕ ثبت تعویض روغن</div>
+        <form id="oilForm" onsubmit="saveOil(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>تاریخ سرویس (شمسی)</label>
+              <input type="text" id="oilDate" placeholder="مثال: 1403/06/15" required />
+            </div>
+            <div class="form-group">
+              <label>کیلومتر فعلی</label>
+              <input type="number" id="oilOdo" placeholder="مثلاً 85000" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>نوع روغن</label>
+              <input type="text" id="oilType" placeholder="مثلاً 10W-40 سینتتیک" required />
+            </div>
+            <div class="form-group">
+              <label>هزینه روغن (تومان)</label>
+              <input type="number" id="oilCostOil" placeholder="0" min="0" value="0" oninput="calcOilTotal()" />
+            </div>
+            <div class="form-group">
+              <label>هزینه فیلتر روغن</label>
+              <input type="number" id="oilCostFilter" placeholder="0" min="0" value="0" oninput="calcOilTotal()" />
+            </div>
+            <div class="form-group">
+              <label>هزینه فیلتر هوا</label>
+              <input type="number" id="oilCostAir" placeholder="0" min="0" value="0" oninput="calcOilTotal()" />
+            </div>
+            <div class="form-group">
+              <label>هزینه فیلتر کابین</label>
+              <input type="number" id="oilCostCabin" placeholder="0" min="0" value="0" oninput="calcOilTotal()" />
+            </div>
+            <div class="form-group">
+              <label>سایر هزینه‌ها</label>
+              <input type="number" id="oilCostOther" placeholder="0" min="0" value="0" oninput="calcOilTotal()" />
+            </div>
+            <div class="form-group">
+              <label>فاصله سرویس بعدی (کیلومتر)</label>
+              <input type="number" id="oilInterval" placeholder="مثلاً 5000" min="1000" value="5000" required />
+            </div>
+            <div class="form-group">
+              <label>توضیحات</label>
+              <input type="text" id="oilNote" placeholder="اختیاری" />
+            </div>
+          </div>
+          <div class="calc-preview show" id="oilCalcPreview">جمع کل هزینه‌ها: <span id="oilTotalVal">0</span> تومان</div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 ذخیره سرویس</button>
+            <button type="button" class="btn btn-outline" style="color:var(--text);border-color:var(--border)" onclick="resetOilForm()">پاک کردن فرم</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 آمار روغن</div>
+        <div class="stats-grid" id="oilStats"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 سوابق تعویض روغن</div>
+        <div class="toolbar">
+          <div class="search-box">
+            <input type="text" id="oilSearch" placeholder="جستجو..." oninput="renderOilTable()" />
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="exportCSV('oil')">📥 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>تاریخ</th><th>کیلومتر</th><th>نوع روغن</th><th>هزینه کل</th>
+                <th>جزئیات</th><th>سرویس بعدی</th><th>توضیح</th><th>عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="oilTableBody"></tbody>
+          </table>
+        </div>
+        <div id="oilEmpty" class="empty hidden"><div class="icon">🛢</div><p>هنوز سرویسی ثبت نشده</p></div>
+      </div>
+    </div>
+
+    <!-- ========== TAB: REPAIR ========== -->
+    <div id="tab-repair" class="tab-content hidden">
+      <div class="card">
+        <div class="card-title">➕ ثبت تعمیر / خرابی</div>
+        <form id="repairForm" onsubmit="saveRepair(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>تاریخ (شمسی)</label>
+              <input type="text" id="repairDate" placeholder="مثال: 1403/06/15" required />
+            </div>
+            <div class="form-group">
+              <label>کیلومتر</label>
+              <input type="number" id="repairOdo" placeholder="مثلاً 85000" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>عنوان تعمیر</label>
+              <input type="text" id="repairTitle" placeholder="مثلاً تعویض لنت" required />
+            </div>
+            <div class="form-group">
+              <label>دسته‌بندی</label>
+              <select id="repairCat">
+                <option value="موتور">موتور</option>
+                <option value="گیربکس">گیربکس</option>
+                <option value="جلوبندی">جلوبندی</option>
+                <option value="برق و الکترونیک">برق و الکترونیک</option>
+                <option value="ترمز">ترمز</option>
+                <option value="بدنه">بدنه</option>
+                <option value="لاستیک">لاستیک</option>
+                <option value="سایر">سایر</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>هزینه (تومان)</label>
+              <input type="number" id="repairCost" placeholder="0" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>وضعیت</label>
+              <select id="repairStatus">
+                <option value="انجام‌شده">انجام‌شده</option>
+                <option value="در حال انجام">در حال انجام</option>
+                <option value="نیاز به تعمیر">نیاز به تعمیر</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1">
+              <label>توضیحات / قطعات تعویضی</label>
+              <textarea id="repairNote" placeholder="جزئیات بیشتر..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">💾 ذخیره تعمیر</button>
+            <button type="button" class="btn btn-outline" style="color:var(--text);border-color:var(--border)" onclick="resetRepairForm()">پاک کردن فرم</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 آمار تعمیرات</div>
+        <div class="stats-grid" id="repairStats"></div>
+        <div class="chart-container"><canvas id="repairChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 سوابق تعمیرات</div>
+        <div class="toolbar">
+          <div class="search-box">
+            <input type="text" id="repairSearch" placeholder="جستجو..." oninput="renderRepairTable()" />
+          </div>
+          <button class="btn btn-accent btn-sm" onclick="exportCSV('repair')">📥 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>تاریخ</th><th>کیلومتر</th><th>عنوان</th><th>دسته</th>
+                <th>هزینه</th><th>وضعیت</th><th>توضیح</th><th>عملیات</th>
+              </tr>
+            </thead>
+            <tbody id="repairTableBody"></tbody>
+          </table>
+        </div>
+        <div id="repairEmpty" class="empty hidden"><div class="icon">🔧</div><p>هنوز تعمیری ثبت نشده</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <div class="fab-container">
+    <button class="fab" onclick="toggleFab()" title="افزودن سریع">＋</button>
+    <div class="fab-menu" id="fabMenu">
+      <button class="fab-item" onclick="quickAdd('fuel')">⛽ افزودن سوخت</button>
+      <button class="fab-item" onclick="quickAdd('oil')">🛢 افزودن روغن</button>
+      <button class="fab-item" onclick="quickAdd('repair')">🔧 افزودن تعمیر</button>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal" id="editModalContent"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ========== Storage ==========
+    const STORAGE_KEY = 'carTracker_v1';
+    let data = { fuel: [], oil: [], repair: [] };
+    let editId = null;
+    let editType = null;
+    let fuelChart = null;
+    let repairChart = null;
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) data = JSON.parse(raw);
+      } catch (e) { console.warn(e); }
+    }
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+    // ========== Shamsi Date Helpers ==========
+    function todayShamsi() {
+      const g = new Date();
+      const j = jalaali.toJalaali(g.getFullYear(), g.getMonth() + 1, g.getDate());
+      return `${j.jy}/${String(j.jm).padStart(2,'0')}/${String(j.jd).padStart(2,'0')}`;
+    }
+    function parseShamsi(str) {
+      // Accept 1403/6/5 or 1403/06/05
+      const m = str.trim().match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (!m) return null;
+      return { jy: +m[1], jm: +m[2], jd: +m[3] };
+    }
+    function formatShamsi(jy, jm, jd) {
+      return `${jy}/${String(jm).padStart(2,'0')}/${String(jd).padStart(2,'0')}`;
+    }
+    function shamsiToSortKey(str) {
+      const p = parseShamsi(str);
+      if (!p) return 0;
+      return p.jy * 10000 + p.jm * 100 + p.jd;
+    }
+    function formatNumber(n) {
+      return Number(n).toLocaleString('fa-IR');
+    }
+
+    // ========== Toast ==========
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // ========== Tabs ==========
+    function switchTab(name) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.remove('hidden');
+      document.querySelector(`.tab-btn[data-tab="${name}"]`).classList.add('active');
+      if (name === 'fuel') { renderFuelStats(); renderFuelTable(); }
+      if (name === 'oil') { renderOilAlert(); renderOilStats(); renderOilTable(); }
+      if (name === 'repair') { renderRepairStats(); renderRepairTable(); }
+      closeFab();
+    }
+
+    // ========== FAB ==========
+    function toggleFab() {
+      document.getElementById('fabMenu').classList.toggle('show');
+    }
+    function closeFab() {
+      document.getElementById('fabMenu').classList.remove('show');
+    }
+    function quickAdd(type) {
+      switchTab(type);
+      closeFab();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setTimeout(() => {
+        const first = document.querySelector(`#tab-${type} input`);
+        if (first) first.focus();
+      }, 300);
+    }
+
+    // ========== FUEL ==========
+    function calcFuelCost() {
+      const liters = parseFloat(document.getElementById('fuelLiters').value) || 0;
+      const price = parseFloat(document.getElementById('fuelPrice').value) || 0;
+      const total = Math.round(liters * price);
+      const prev = document.getElementById('fuelCalcPreview');
+      if (liters > 0 && price > 0) {
+        prev.classList.add('show');
+        document.getElementById('fuelCostVal').textContent = formatNumber(total);
+      } else {
+        prev.classList.remove('show');
+      }
+      return total;
+    }
+    function resetFuelForm() {
+      document.getElementById('fuelForm').reset();
+      document.getElementById('fuelDate').value = todayShamsi();
+      document.getElementById('fuelCalcPreview').classList.remove('show');
+      editId = null; editType = null;
+    }
+    function saveFuel(e) {
+      e.preventDefault();
+      const date = document.getElementById('fuelDate').value.trim();
+      if (!parseShamsi(date)) { showToast('تاریخ شمسی معتبر وارد کنید'); return; }
+      const rec = {
+        id: editId || uid(),
+        date,
+        odo: parseInt(document.getElementById('fuelOdo').value) || 0,
+        liters: parseFloat(document.getElementById('fuelLiters').value) || 0,
+        price: parseFloat(document.getElementById('fuelPrice').value) || 0,
+        cost: calcFuelCost(),
+        type: document.getElementById('fuelType').value,
+        note: document.getElementById('fuelNote').value.trim()
+      };
+      if (editId && editType === 'fuel') {
+        const idx = data.fuel.findIndex(x => x.id === editId);
+        if (idx >= 0) data.fuel[idx] = rec;
+        showToast('رکورد سوخت ویرایش شد');
+      } else {
+        data.fuel.push(rec);
+        showToast('سوخت با موفقیت ثبت شد');
+      }
+      saveData();
+      resetFuelForm();
+      renderFuelStats();
+      renderFuelTable();
+    }
+    function renderFuelStats() {
+      const list = data.fuel;
+      const totalCost = list.reduce((s, r) => s + (r.cost || 0), 0);
+      const totalLiters = list.reduce((s, r) => s + (r.liters || 0), 0);
+      const count = list.length;
+      let avgCons = '—';
+      if (list.length >= 2) {
+        const sorted = [...list].sort((a,b) => a.odo - b.odo);
+        const dist = sorted[sorted.length-1].odo - sorted[0].odo;
+        if (dist > 0) {
+          // approximate consumption: total liters / distance * 100
+          avgCons = ((totalLiters / dist) * 100).toFixed(1);
+        }
+      }
+      document.getElementById('fuelStats').innerHTML = `
+        <div class="stat-card"><div class="value">${formatNumber(count)}</div><div class="label">تعداد ثبت</div></div>
+        <div class="stat-card"><div class="value">${formatNumber(totalLiters)}</div><div class="label">کل لیتر</div></div>
+        <div class="stat-card"><div class="value">${formatNumber(totalCost)}</div><div class="label">کل هزینه (تومان)</div></div>
+        <div class="stat-card"><div class="value">${avgCons}</div><div class="label">میانگین مصرف (ل/۱۰۰ک)</div></div>
+      `;
+      // Chart - last 8 records cost
+      const sorted = [...list].sort((a,b) => shamsiToSortKey(a.date) - shamsiToSortKey(b.date)).slice(-8);
+      const ctx = document.getElementById('fuelChart').getContext('2d');
+      if (fuelChart) fuelChart.destroy();
+      fuelChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sorted.map(r => r.date),
+          datasets: [{
+            label: 'هزینه (تومان)',
+            data: sorted.map(r => r.cost),
+            backgroundColor: 'rgba(15, 118, 110, 0.7)',
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { callback: v => formatNumber(v) } } }
+        }
+      });
+    }
+    function renderFuelTable() {
+      const q = (document.getElementById('fuelSearch').value || '').trim().toLowerCase();
+      let list = [...data.fuel].sort((a,b) => shamsiToSortKey(b.date) - shamsiToSortKey(a.date));
+      if (q) {
+        list = list.filter(r =>
+          r.date.includes(q) || r.type.includes(q) || (r.note||'').toLowerCase().includes(q) ||
+          String(r.odo).includes(q) || String(r.cost).includes(q)
+        );
+      }
+      const tbody = document.getElementById('fuelTableBody');
+      const empty = document.getElementById('fuelEmpty');
+      if (!list.length) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      tbody.innerHTML = list.map(r => `
+        <tr>
+          <td>${r.date}</td>
+          <td>${formatNumber(r.odo)}</td>
+          <td>${r.liters}</td>
+          <td>${formatNumber(r.price)}</td>
+          <td>${formatNumber(r.cost)}</td>
+          <td>${r.type}</td>
+          <td>${r.note || '—'}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-primary" onclick="editRecord('fuel','${r.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRecord('fuel','${r.id}')">🗑</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ========== OIL ==========
+    function calcOilTotal() {
+      const a = parseFloat(document.getElementById('oilCostOil').value) || 0;
+      const b = parseFloat(document.getElementById('oilCostFilter').value) || 0;
+      const c = parseFloat(document.getElementById('oilCostAir').value) || 0;
+      const d = parseFloat(document.getElementById('oilCostCabin').value) || 0;
+      const e = parseFloat(document.getElementById('oilCostOther').value) || 0;
+      const total = a + b + c + d + e;
+      document.getElementById('oilTotalVal').textContent = formatNumber(total);
+      return total;
+    }
+    function resetOilForm() {
+      document.getElementById('oilForm').reset();
+      document.getElementById('oilDate').value = todayShamsi();
+      document.getElementById('oilInterval').value = 5000;
+      document.getElementById('oilCostOil').value = 0;
+      document.getElementById('oilCostFilter').value = 0;
+      document.getElementById('oilCostAir').value = 0;
+      document.getElementById('oilCostCabin').value = 0;
+      document.getElementById('oilCostOther').value = 0;
+      calcOilTotal();
+      editId = null; editType = null;
+    }
+    function saveOil(e) {
+      e.preventDefault();
+      const date = document.getElementById('oilDate').value.trim();
+      if (!parseShamsi(date)) { showToast('تاریخ شمسی معتبر وارد کنید'); return; }
+      const odo = parseInt(document.getElementById('oilOdo').value) || 0;
+      const interval = parseInt(document.getElementById('oilInterval').value) || 5000;
+      const rec = {
+        id: editId || uid(),
+        date,
+        odo,
+        oilType: document.getElementById('oilType').value.trim(),
+        costOil: parseFloat(document.getElementById('oilCostOil').value) || 0,
+        costFilter: parseFloat(document.getElementById('oilCostFilter').value) || 0,
+        costAir: parseFloat(document.getElementById('oilCostAir').value) || 0,
+        costCabin: parseFloat(document.getElementById('oilCostCabin').value) || 0,
+        costOther: parseFloat(document.getElementById('oilCostOther').value) || 0,
+        total: calcOilTotal(),
+        interval,
+        nextOdo: odo + interval,
+        note: document.getElementById('oilNote').value.trim()
+      };
+      if (editId && editType === 'oil') {
+        const idx = data.oil.findIndex(x => x.id === editId);
+        if (idx >= 0) data.oil[idx] = rec;
+        showToast('سرویس روغن ویرایش شد');
+      } else {
+        data.oil.push(rec);
+        showToast('سرویس روغن ثبت شد');
+      }
+      saveData();
+      resetOilForm();
+      renderOilAlert();
+      renderOilStats();
+      renderOilTable();
+    }
+    function renderOilAlert() {
+      const box = document.getElementById('oilAlert');
+      if (!data.oil.length) { box.innerHTML = ''; return; }
+      // Find latest by odo
+      const latest = [...data.oil].sort((a,b) => b.odo - a.odo)[0];
+      // Try to get current odo from latest fuel
+      let currentOdo = latest.odo;
+      if (data.fuel.length) {
+        const maxFuel = Math.max(...data.fuel.map(f => f.odo));
+        if (maxFuel > currentOdo) currentOdo = maxFuel;
+      }
+      const remaining = latest.nextOdo - currentOdo;
+      let cls = 'alert-ok', msg = '';
+      if (remaining <= 0) {
+        cls = 'alert-danger';
+        msg = `⚠️ سرویس روغن گذشته است! کیلومتر فعلی ≈ ${formatNumber(currentOdo)} — سرویس بعدی در ${formatNumber(latest.nextOdo)} بود.`;
+      } else if (remaining <= 500) {
+        cls = 'alert-warn';
+        msg = `🔔 نزدیک به سرویس روغن: حدود ${formatNumber(remaining)} کیلومتر مانده (تا ${formatNumber(latest.nextOdo)})`;
+      } else {
+        cls = 'alert-ok';
+        msg = `✅ وضعیت روغن خوب است. حدود ${formatNumber(remaining)} کیلومتر تا سرویس بعدی (${formatNumber(latest.nextOdo)})`;
+      }
+      box.innerHTML = `<div class="alert ${cls}">${msg}</div>`;
+    }
+    function renderOilStats() {
+      const list = data.oil;
+      const totalCost = list.reduce((s,r) => s + (r.total || 0), 0);
+      const count = list.length;
+      const last = list.length ? [...list].sort((a,b) => b.odo - a.odo)[0] : null;
+      document.getElementById('oilStats').innerHTML = `
+        <div class="stat-card"><div class="value">${formatNumber(count)}</div><div class="label">تعداد سرویس</div></div>
+        <div class="stat-card"><div class="value">${formatNumber(totalCost)}</div><div class="label">کل هزینه (تومان)</div></div>
+        <div class="stat-card"><div class="value">${last ? formatNumber(last.odo) : '—'}</div><div class="label">آخرین کیلومتر</div></div>
+        <div class="stat-card"><div class="value">${last ? formatNumber(last.nextOdo) : '—'}</div><div class="label">سرویس بعدی</div></div>
+      `;
+    }
+    function renderOilTable() {
+      const q = (document.getElementById('oilSearch').value || '').trim().toLowerCase();
+      let list = [...data.oil].sort((a,b) => shamsiToSortKey(b.date) - shamsiToSortKey(a.date));
+      if (q) {
+        list = list.filter(r =>
+          r.date.includes(q) || (r.oilType||'').toLowerCase().includes(q) ||
+          (r.note||'').toLowerCase().includes(q) || String(r.odo).includes(q)
+        );
+      }
+      const tbody = document.getElementById('oilTableBody');
+      const empty = document.getElementById('oilEmpty');
+      if (!list.length) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      tbody.innerHTML = list.map(r => {
+        const details = [
+          r.costOil ? `روغن: ${formatNumber(r.costOil)}` : '',
+          r.costFilter ? `ف.روغن: ${formatNumber(r.costFilter)}` : '',
+          r.costAir ? `ف.هوا: ${formatNumber(r.costAir)}` : '',
+          r.costCabin ? `ف.کابین: ${formatNumber(r.costCabin)}` : '',
+          r.costOther ? `سایر: ${formatNumber(r.costOther)}` : ''
+        ].filter(Boolean).join(' | ') || '—';
+        return `
+        <tr>
+          <td>${r.date}</td>
+          <td>${formatNumber(r.odo)}</td>
+          <td>${r.oilType}</td>
+          <td>${formatNumber(r.total)}</td>
+          <td style="font-size:0.78rem">${details}</td>
+          <td>${formatNumber(r.nextOdo)}</td>
+          <td>${r.note || '—'}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-primary" onclick="editRecord('oil','${r.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRecord('oil','${r.id}')">🗑</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ========== REPAIR ==========
+    function resetRepairForm() {
+      document.getElementById('repairForm').reset();
+      document.getElementById('repairDate').value = todayShamsi();
+      editId = null; editType = null;
+    }
+    function saveRepair(e) {
+      e.preventDefault();
+      const date = document.getElementById('repairDate').value.trim();
+      if (!parseShamsi(date)) { showToast('تاریخ شمسی معتبر وارد کنید'); return; }
+      const rec = {
+        id: editId || uid(),
+        date,
+        odo: parseInt(document.getElementById('repairOdo').value) || 0,
+        title: document.getElementById('repairTitle').value.trim(),
+        cat: document.getElementById('repairCat').value,
+        cost: parseFloat(document.getElementById('repairCost').value) || 0,
+        status: document.getElementById('repairStatus').value,
+        note: document.getElementById('repairNote').value.trim()
+      };
+      if (editId && editType === 'repair') {
+        const idx = data.repair.findIndex(x => x.id === editId);
+        if (idx >= 0) data.repair[idx] = rec;
+        showToast('تعمیر ویرایش شد');
+      } else {
+        data.repair.push(rec);
+        showToast('تعمیر ثبت شد');
+      }
+      saveData();
+      resetRepairForm();
+      renderRepairStats();
+      renderRepairTable();
+    }
+    function renderRepairStats() {
+      const list = data.repair;
+      const totalCost = list.reduce((s,r) => s + (r.cost || 0), 0);
+      const count = list.length;
+      const pending = list.filter(r => r.status !== 'انجام‌شده').length;
+      // by category
+      const cats = {};
+      list.forEach(r => { cats[r.cat] = (cats[r.cat] || 0) + (r.cost || 0); });
+      document.getElementById('repairStats').innerHTML = `
+        <div class="stat-card"><div class="value">${formatNumber(count)}</div><div class="label">تعداد ثبت</div></div>
+        <div class="stat-card"><div class="value">${formatNumber(totalCost)}</div><div class="label">کل هزینه</div></div>
+        <div class="stat-card"><div class="value">${formatNumber(pending)}</div><div class="label">باز / در جریان</div></div>
+        <div class="stat-card"><div class="value">${Object.keys(cats).length}</div><div class="label">دسته‌های مختلف</div></div>
+      `;
+      const labels = Object.keys(cats);
+      const values = Object.values(cats);
+      const ctx = document.getElementById('repairChart').getContext('2d');
+      if (repairChart) repairChart.destroy();
+      if (labels.length) {
+        repairChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{
+              data: values,
+              backgroundColor: ['#0f766e','#14b8a6','#f59e0b','#ef4444','#8b5cf6','#3b82f6','#ec4899','#64748b']
+            }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'Tahoma', size: 11 } } } }
+          }
+        });
+      }
+    }
+    function renderRepairTable() {
+      const q = (document.getElementById('repairSearch').value || '').trim().toLowerCase();
+      let list = [...data.repair].sort((a,b) => shamsiToSortKey(b.date) - shamsiToSortKey(a.date));
+      if (q) {
+        list = list.filter(r =>
+          r.date.includes(q) || (r.title||'').toLowerCase().includes(q) ||
+          (r.cat||'').includes(q) || (r.note||'').toLowerCase().includes(q) ||
+          (r.status||'').includes(q)
+        );
+      }
+      const tbody = document.getElementById('repairTableBody');
+      const empty = document.getElementById('repairEmpty');
+      if (!list.length) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      const statusBadge = s => {
+        if (s === 'انجام‌شده') return `<span class="badge badge-ok">${s}</span>`;
+        if (s === 'در حال انجام') return `<span class="badge badge-warn">${s}</span>`;
+        return `<span class="badge badge-danger">${s}</span>`;
+      };
+      tbody.innerHTML = list.map(r => `
+        <tr>
+          <td>${r.date}</td>
+          <td>${formatNumber(r.odo)}</td>
+          <td>${r.title}</td>
+          <td>${r.cat}</td>
+          <td>${formatNumber(r.cost)}</td>
+          <td>${statusBadge(r.status)}</td>
+          <td>${r.note || '—'}</td>
+          <td class="actions">
+            <button class="btn btn-sm btn-primary" onclick="editRecord('repair','${r.id}')">✏️</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRecord('repair','${r.id}')">🗑</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ========== Edit / Delete ==========
+    function editRecord(type, id) {
+      const list = data[type];
+      const rec = list.find(x => x.id === id);
+      if (!rec) return;
+      editId = id;
+      editType = type;
+      switchTab(type);
+      if (type === 'fuel') {
+        document.getElementById('fuelDate').value = rec.date;
+        document.getElementById('fuelOdo').value = rec.odo;
+        document.getElementById('fuelLiters').value = rec.liters;
+        document.getElementById('fuelPrice').value = rec.price;
+        document.getElementById('fuelType').value = rec.type;
+        document.getElementById('fuelNote').value = rec.note || '';
+        calcFuelCost();
+      } else if (type === 'oil') {
+        document.getElementById('oilDate').value = rec.date;
+        document.getElementById('oilOdo').value = rec.odo;
+        document.getElementById('oilType').value = rec.oilType;
+        document.getElementById('oilCostOil').value = rec.costOil || 0;
+        document.getElementById('oilCostFilter').value = rec.costFilter || 0;
+        document.getElementById('oilCostAir').value = rec.costAir || 0;
+        document.getElementById('oilCostCabin').value = rec.costCabin || 0;
+        document.getElementById('oilCostOther').value = rec.costOther || 0;
+        document.getElementById('oilInterval').value = rec.interval || 5000;
+        document.getElementById('oilNote').value = rec.note || '';
+        calcOilTotal();
+      } else if (type === 'repair') {
+        document.getElementById('repairDate').value = rec.date;
+        document.getElementById('repairOdo').value = rec.odo;
+        document.getElementById('repairTitle').value = rec.title;
+        document.getElementById('repairCat').value = rec.cat;
+        document.getElementById('repairCost').value = rec.cost;
+        document.getElementById('repairStatus').value = rec.status;
+        document.getElementById('repairNote').value = rec.note || '';
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('در حال ویرایش — پس از تغییر ذخیره کنید');
+    }
+    function deleteRecord(type, id) {
+      if (!confirm('آیا از حذف این رکورد مطمئن هستید؟')) return;
+      data[type] = data[type].filter(x => x.id !== id);
+      saveData();
+      showToast('رکورد حذف شد');
+      if (type === 'fuel') { renderFuelStats(); renderFuelTable(); }
+      if (type === 'oil') { renderOilAlert(); renderOilStats(); renderOilTable(); }
+      if (type === 'repair') { renderRepairStats(); renderRepairTable(); }
+    }
+
+    // ========== CSV Export ==========
+    function toCSV(rows) {
+      return rows.map(r => r.map(c => {
+        const s = String(c ?? '');
+        if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
+        return s;
+      }).join(',')).join('\n');
+    }
+    function downloadCSV(filename, content) {
+      // BOM for Excel Persian support
+      const bom = '\uFEFF';
+      const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    function exportCSV(type) {
+      let rows = [], filename = '';
+      if (type === 'fuel') {
+        filename = 'سوخت.csv';
+        rows = [['تاریخ','کیلومتر','لیتر','قیمت هر لیتر','هزینه کل','نوع سوخت','توضیحات']];
+        [...data.fuel].sort((a,b)=>shamsiToSortKey(b.date)-shamsiToSortKey(a.date))
+          .forEach(r => rows.push([r.date, r.odo, r.liters, r.price, r.cost, r.type, r.note||'']));
+      } else if (type === 'oil') {
+        filename = 'روغن.csv';
+        rows = [['تاریخ','کیلومتر','نوع روغن','هزینه روغن','فیلتر روغن','فیلتر هوا','فیلتر کابین','سایر','جمع کل','سرویس بعدی','توضیحات']];
+        [...data.oil].sort((a,b)=>shamsiToSortKey(b.date)-shamsiToSortKey(a.date))
+          .forEach(r => rows.push([r.date,r.odo,r.oilType,r.costOil,r.costFilter,r.costAir,r.costCabin,r.costOther,r.total,r.nextOdo,r.note||'']));
+      } else if (type === 'repair') {
+        filename = 'تعمیرات.csv';
+        rows = [['تاریخ','کیلومتر','عنوان','دسته‌بندی','هزینه','وضعیت','توضیحات']];
+        [...data.repair].sort((a,b)=>shamsiToSortKey(b.date)-shamsiToSortKey(a.date))
+          .forEach(r => rows.push([r.date,r.odo,r.title,r.cat,r.cost,r.status,r.note||'']));
+      }
+      if (rows.length <= 1) { showToast('داده‌ای برای خروجی وجود ندارد'); return; }
+      downloadCSV(filename, toCSV(rows));
+      showToast('فایل CSV دانلود شد');
+    }
+    function exportAllCSV() {
+      const rows = [['نوع','تاریخ','کیلومتر','عنوان/نوع','هزینه','جزئیات']];
+      data.fuel.forEach(r => rows.push(['سوخت', r.date, r.odo, r.type, r.cost, `${r.liters} لیتر × ${r.price}`]));
+      data.oil.forEach(r => rows.push(['روغن', r.date, r.odo, r.oilType, r.total, `بعدی: ${r.nextOdo}`]));
+      data.repair.forEach(r => rows.push(['تعمیر', r.date, r.odo, r.title, r.cost, `${r.cat} | ${r.status}`]));
+      if (rows.length <= 1) { showToast('داده‌ای وجود ندارد'); return; }
+      downloadCSV('دفترچه_خودرو_همه.csv', toCSV(rows));
+      showToast('خروجی کامل دانلود شد');
+    }
+    function confirmClearAll() {
+      if (!confirm('همه داده‌ها برای همیشه پاک می‌شوند. مطمئن هستید؟')) return;
+      if (!confirm('تأیید نهایی: پاک کردن همه رکوردها؟')) return;
+      data = { fuel: [], oil: [], repair: [] };
+      saveData();
+      showToast('همه داده‌ها پاک شد');
+      renderFuelStats(); renderFuelTable();
+      renderOilAlert(); renderOilStats(); renderOilTable();
+      renderRepairStats(); renderRepairTable();
+    }
+
+    // ========== Init ==========
+    loadData();
+    document.getElementById('fuelDate').value = todayShamsi();
+    document.getElementById('oilDate').value = todayShamsi();
+    document.getElementById('repairDate').value = todayShamsi();
+    renderFuelStats();
+    renderFuelTable();
+  </script>
+</body>
+</html>
